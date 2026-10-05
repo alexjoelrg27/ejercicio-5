@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Aplicacion web de lista de tareas con HTML5 semantico, accesible y responsiva.">
+<meta name="color-scheme" content="light dark">
+<title>Lista de tareas</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<a class="skip-link" href="#contenido">Saltar al contenido</a>
+
+<header class="cabecera">
+  <h1>Mi lista de tareas</h1>
+</header>
+
+<main id="contenido">
+  <section class="panel" aria-labelledby="titulo-agregar">
+    <h2 id="titulo-agregar">Agregar tarea</h2>
+
+    <form id="form-agregar" class="agregar" novalidate>
+      <label class="visually-hidden" for="tarea">Nueva tarea</label>
+      <input
+        type="text"
+        id="tarea"
+        name="tarea"
+        placeholder="Nueva tarea"
+        autocomplete="off"
+        aria-describedby="tarea-error"
+        aria-invalid="false">
+      <button id="agregar" type="submit">Agregar tarea</button>
+    </form>
+
+    <p id="tarea-error" class="error" role="status" aria-live="polite"></p>
+  </section>
+
+  <section class="panel" aria-labelledby="titulo-lista">
+    <h2 id="titulo-lista">Tareas guardadas</h2>
+    <p id="lista-vacia" class="vacia">Todavia no hay tareas. Agrega la primera.</p>
+    <ul id="lista" class="lista"></ul>
+  </section>
+</main>
+
+<footer class="pie">
+  <p>Ejercicio 5 &middot; HTML5 semantico &middot; WCAG 2.2 AA</p>
+</footer>
+
+<script src="script.js" defer></script>
+</body>
+</html>

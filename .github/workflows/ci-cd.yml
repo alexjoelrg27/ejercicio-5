@@ -1,0 +1,99 @@
+name: CI/CD
+
+on:
+  push:
+    branches: ["main", "master"]
+  pull_request:
+    branches: ["main", "master"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  calidad:
+    name: HTML5, semantica y enlaces seguros
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Validar HTML5 y HTML semantico (html-validate)
+        run: npm run test:html
+
+      - name: Verificar seguridad de enlaces externos
+        run: npm run test:links
+
+      - name: Comprobar disponibilidad de enlaces externos
+        run: npm run test:links:online
+        continue-on-error: true
+
+  accesibilidad:
+    name: WCAG AA y responsividad
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Instalar navegador de pruebas
+        run: npx playwright install --with-deps chromium
+
+      - name: Ejecutar pruebas de accesibilidad y responsividad
+        run: npm run test:a11y
+
+      - name: Subir informe de pruebas
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: informe-pruebas
+          path: playwright-report/
+          retention-days: 7
+
+  despliegue:
+    name: Publicar en GitHub Pages
+    needs: [calidad, accesibilidad]
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Preparar archivos publicables
+        run: npm run build
+
+      - name: Configurar Pages
+        id: pages
+        uses: actions/configure-pages@v5
+
+      - name: Subir artefacto estatico
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+      - name: Desplegar en GitHub Pages
+        id: deploy
+        uses: actions/deploy-pages@v4
